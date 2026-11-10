@@ -8,13 +8,15 @@ public abstract class MediaItem
     private int Month;
     private int Day;
     private String Title;
+    private int Score;
     private ArrayList<String> Tags;
-    private MediaItem(String title, int year, int month, int day)
+    public MediaItem(String title, int year, int month, int day, int score)
     {
         this.Title = title;
         this.Year = year;
         this.Month = month;
         this.Day = day;
+        this.Score = score;
     }
 
     public int getDay() {
@@ -51,6 +53,14 @@ public abstract class MediaItem
 
     public ArrayList<String> getTags() {
         return this.Tags;
+    }
+
+    public int getScore() {
+        return this.Score;
+    }
+
+    public void setScore(int score) {
+        this.Score = score;
     }
 
     public void setTags(ArrayList<String> tags) {
