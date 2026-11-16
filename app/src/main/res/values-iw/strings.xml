@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="register">יצירת חשבון חדש</string>
+    <string name="forgot_password">שכחתי סיסמה</string>
+    <string name="log_in">כניסה</string>
+    <string name="password">סיסמה:</string>
+    <string name="email">איימל:</string>
+    <string name="enter_password">תזינו סיסמה…</string>
+    <string name="enter_email">תיזנו איימל…</string>
+    <string name="save_button">שמירת ביקורת</string>
+    <string name="add_to_list_button">הוסיפו לרשימה…</string>
+    <string name="back_button">חזרה</string>
+    <string name="write_review">כתבו ביקורת…</string>
+</resources>
