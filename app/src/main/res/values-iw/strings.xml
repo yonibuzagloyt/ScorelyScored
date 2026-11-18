@@ -12,4 +12,8 @@
     <string name="add_to_list_button">הוסיפו לרשימה…</string>
     <string name="back_button">חזרה</string>
     <string name="write_review">כתבו ביקורת…</string>
+    <string name="enter_username">תזינו שם משתמש…</string>
+    <string name="username_title">שם משתמש:</string>
+    <string name="sign_in">תיצרו חשבון</string>
+    <string name="repeat_password">תזינו סיסמה שוב:</string>
 </resources>

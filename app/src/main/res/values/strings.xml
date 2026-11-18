@@ -11,4 +11,8 @@
     <string name="add_to_list_button">Add To List…</string>
     <string name="back_button">back</string>
     <string name="write_review">Write Review…</string>
+    <string name="enter_username">Enter Username…</string>
+    <string name="username_title">Username:</string>
+    <string name="sign_in">Register Account</string>
+    <string name="repeat_password">Repeat Password:</string>
 </resources>
