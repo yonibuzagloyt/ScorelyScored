@@ -15,4 +15,7 @@
     <string name="username_title">Username:</string>
     <string name="sign_in">Register Account</string>
     <string name="repeat_password">Repeat Password:</string>
+    <string name="hello">שלום,</string>
+    <string name="hour_currently">השעה עכשיו:</string>
+    <string name="nothing_to_show">אין משימות להצגה</string>
 </resources>

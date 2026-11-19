@@ -16,4 +16,7 @@
     <string name="username_title">שם משתמש:</string>
     <string name="sign_in">תיצרו חשבון</string>
     <string name="repeat_password">תזינו סיסמה שוב:</string>
+    <string name="hello">שלום,</string>
+    <string name="hour_currently">השעה עכשיו:</string>
+    <string name="nothing_to_show">אין משימות להצגה</string>
 </resources>
