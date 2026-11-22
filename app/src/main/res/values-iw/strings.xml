@@ -19,4 +19,5 @@
     <string name="hello">שלום,</string>
     <string name="hour_currently">השעה עכשיו:</string>
     <string name="nothing_to_show">אין משימות להצגה</string>
+    <string name="password_must_be_at_least_6_characters">Password must be at least 6 characters</string>
 </resources>

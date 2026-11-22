@@ -22,4 +22,11 @@
     <string name="please_put_in_an_username">please put in an username.</string>
     <string name="please_put_in_an_email">please put in an email!</string>
     <string name="please_fill_in_a_password">Please fill in a password.</string>
+    <string name="password_must_be_at_least_6_characters">Password must be at least 6 characters</string>
+    <string name="couldn_t_send_the_reset_email_check_the_address">Couldn\'t send the reset email. Check the address.</string>
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="if_this_email_is_registered_a_reset_link_was_sent_check_your_spam_folder_too">If this email is registered, a reset link was sent. Check your spam folder too.</string>
+    <string name="type_your_email_first_then_press_forgot_password">Type your email first, then press Forgot password</string>
+    <string name="wrong_email_or_password">Wrong email or password</string>
+    <string name="please_fill_in_email_and_password">Please fill in email and password</string>
 </resources>
