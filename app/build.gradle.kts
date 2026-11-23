@@ -45,5 +45,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     implementation(platform("com.google.firebase:firebase-bom:35.2.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.code.gson:gson:2.10.1")
 
 }

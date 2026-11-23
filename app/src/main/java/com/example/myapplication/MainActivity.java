@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
@@ -28,9 +29,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         sp = getSharedPreferences(INFO, MODE_PRIVATE);
         auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() != null) {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
+            return;
+        }
         showLogin();
     }
-
     private void showLogin() {
         setContentView(R.layout.activity_main);
         etEmail = findViewById(R.id.etEmail);
@@ -60,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             saveLogin(email, password);   // optional: remember the last login
-                            // startActivity(new Intent(MainActivity.this, HomeActivity.class));
+                            startActivity(new Intent(MainActivity.this, HomeActivity.class));
                         } else {
                             Exception e = task.getException();
                             if (e instanceof FirebaseNetworkException) {
