@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:minHeight="48dp"
-            android:text="רשימה חדשה" />
+            android:text="@string/new_list" />
         <Button
             android:id="@+id/btnLogout"
             style="?android:attr/buttonBarButtonStyle"
@@ -64,6 +64,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:minHeight="48dp"
-            android:text="התנתקות" />
+            android:text="@string/log_out" />
     </LinearLayout>
 </LinearLayout>

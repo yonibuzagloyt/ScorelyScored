@@ -61,11 +61,11 @@ public class ItemDetailsActivity extends AppCompatActivity {
             if (text.isEmpty()) {
                 // an empty review = delete the saved one
                 reviewRef.removeValue()
-                        .addOnSuccessListener(x -> Toast.makeText(this, "Review removed", Toast.LENGTH_SHORT).show())
+                        .addOnSuccessListener(x -> Toast.makeText(this, R.string.review_removed, Toast.LENGTH_SHORT).show())
                         .addOnFailureListener(e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show());
             } else {
                 reviewRef.setValue(text)
-                        .addOnSuccessListener(x -> Toast.makeText(this, "Review saved", Toast.LENGTH_SHORT).show())
+                        .addOnSuccessListener(x -> Toast.makeText(this, R.string.review_saved, Toast.LENGTH_SHORT).show())
                         .addOnFailureListener(e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show());
             }
         });

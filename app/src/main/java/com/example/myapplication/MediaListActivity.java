@@ -44,6 +44,7 @@ public class MediaListActivity extends AppCompatActivity {
         TextView tvEmpty = findViewById(R.id.tvEmpty);
         ListView lvTasks = findViewById(R.id.lvTasks);
         Button btnFillExample = findViewById(R.id.btnFillExample);
+        Button btnBack= findViewById(R.id.btnBack);
 
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, shownItems);
         lvTasks.setAdapter(adapter);
@@ -64,6 +65,7 @@ public class MediaListActivity extends AppCompatActivity {
         });
 
         btnFillExample.setOnClickListener(v -> fillExample());
+        btnBack.setOnClickListener(v -> finish());
     }
 
     @Override
@@ -106,9 +108,8 @@ public class MediaListActivity extends AppCompatActivity {
     private void confirmDelete(int position) {
         MediaItem item = shownItems.get(position);
         new AlertDialog.Builder(this)
-                .setTitle("מחיקה")
-                .setMessage("למחוק את \"" + item.getTitle() + "\"?")
-                .setPositiveButton("מחק", (d, w) -> {
+                .setMessage(getString(R.string.remove_list) + " " + item.getTitle() + "?")
+                .setPositiveButton(getString(R.string.delete), (d, w) -> {
                     MediaList list = storage.findList(listId);
                     if (list != null && position < list.getItems().size()) {
                         list.getItems().remove(position);
@@ -124,7 +125,7 @@ public class MediaListActivity extends AppCompatActivity {
                     }
                     reload();
                 })
-                .setNegativeButton("ביטול", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 }

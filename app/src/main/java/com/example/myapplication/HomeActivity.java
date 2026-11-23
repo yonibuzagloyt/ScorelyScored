@@ -49,12 +49,11 @@ public class HomeActivity extends AppCompatActivity {
         Button btnLogout = findViewById(R.id.btnLogout);
 
         // the username was saved in the database when the user registered
-        tvHello.setText("שלום!");
         FirebaseDatabase.getInstance(MainActivity.DATABASE_URL)
                 .getReference("users").child(user.getUid()).child("username").get()
                 .addOnSuccessListener(snapshot -> {
                     String name = snapshot.getValue(String.class);
-                    if (name != null) tvHello.setText("שלום " + name + "!");
+                    if (name != null) tvHello.setText(getString(R.string.hello) + " " + name);
                 });
 
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, lists);
@@ -93,41 +92,39 @@ public class HomeActivity extends AppCompatActivity {
         lists.clear();
         lists.addAll(storage.loadAll());
         adapter.notifyDataSetChanged();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            tvTime.setText("השעה עכשיו: " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
-        }
+        tvTime.setText(getString(R.string.hour_currently) + " " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
     }
 
     private void askForListName() {
         EditText input = new EditText(this);
-        input.setHint("שם הרשימה");
+        input.setHint(R.string.list_name);
         input.setSingleLine(true);
 
         new AlertDialog.Builder(this)
-                .setTitle("רשימה חדשה")
+                .setTitle(getString(R.string.new_list))
                 .setView(input)
-                .setPositiveButton("הוסף", (d, w) -> {
+                .setPositiveButton(getString(R.string.add), (d, w) -> {
                     String name = input.getText().toString().trim();
                     if (name.isEmpty()) {
-                        Toast.makeText(this, "יש להזין שם", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.please_enter_name, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     storage.addList(name);
                     reload();
                 })
-                .setNegativeButton("ביטול", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
     private void confirmDelete(MediaList list) {
         new AlertDialog.Builder(this)
-                .setTitle("מחיקת רשימה")
-                .setMessage("למחוק את \"" + list.getName() + "\" ואת כל מה שבתוכה?")
-                .setPositiveButton("מחק", (d, w) -> {
+                .setTitle(R.string.remove_list)
+                .setMessage(getString(R.string.remove) + list.getName() + getString(R.string.and_its_items))
+                .setPositiveButton(R.string.delete, (d, w) -> {
                     storage.deleteList(list.getId());
                     reload();
                 })
-                .setNegativeButton("ביטול", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 

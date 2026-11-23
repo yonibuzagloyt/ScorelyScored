@@ -1,12 +1,25 @@
 package com.example.myapplication;
 
+import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
@@ -19,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_EMAIL = "email";
     private static final String KEY_PASSWORD = "password";
     public static final String DATABASE_URL = "https://scorely-475cf-default-rtdb.europe-west1.firebasedatabase.app";
+    public  static final String CHANNEL_ID   = "demo_channel";
+    private static final int    NOTIF_ID     = 101;
+    private static final int    PERM_REQUEST = 1001;
 
     private EditText etEmail, etPassword, etRepeatPassword, etUsername;
     private SharedPreferences sp;
@@ -34,7 +50,31 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
+        createNotificationChannel();
+        askNotificationPermission();
         showLogin();
+    }
+    /** ערוץ ההתראות. מ-API 26 התראה בלי ערוץ פשוט לא תוצג. */
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID, "הודעות כלליות",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("התראות של אפליקציית ההדגמה");
+            NotificationManager nm = getSystemService(NotificationManager.class);
+            nm.createNotificationChannel(channel);
+        }
+    }
+
+    /** מ-API 33 (TIRAMISU) חייבים לבקש מהמשתמש הרשאה להצגת התראות. */
+    private void askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, PERM_REQUEST);
+            }
+        }
     }
     private void showLogin() {
         setContentView(R.layout.activity_main);
@@ -83,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             String email = etEmail.getText().toString().trim();
 
             if (email.isEmpty()) {
-                Toast.makeText(this, R.string.type_your_email_first_then_press_forgot_password, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.please_put_in_an_email, Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -92,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // the saved password is now outdated, so forget it
                             sp.edit().remove(KEY_PASSWORD).apply();
-                            Toast.makeText(this, R.string.if_this_email_is_registered_a_reset_link_was_sent_check_your_spam_folder_too, Toast.LENGTH_LONG).show();
+                            showNotification();
                         } else if (task.getException() instanceof FirebaseNetworkException) {
                             Toast.makeText(this, R.string.no_internet_connection, Toast.LENGTH_SHORT).show();
                         } else {
@@ -171,5 +211,35 @@ public class MainActivity extends AppCompatActivity {
     private void forgetLogin() {
         sp.edit().clear().apply();
         auth.signOut();   // for signing out on activity_home
+    }
+    private void showNotification() {
+        // לאן לקפוץ כשלוחצים על ההתראה
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_APP_EMAIL);
+
+        // "מעטפה מבוילת לתשובה" — המערכת תפעיל את ה-Intent בשמנו
+        PendingIntent pi = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this, CHANNEL_ID)
+                        .setSmallIcon(android.R.drawable.ic_dialog_email)
+                            .setContentTitle("Reset Password")
+                        .setContentText(getText(R.string.if_this_email_is_registered_a_reset_link_was_sent_check_your_spam_folder_too))
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(""))
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setContentIntent(pi)
+                        .setAutoCancel(true);    // ההתראה תיעלם אחרי הלחיצה
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) {
+            NotificationManagerCompat.from(this).notify(NOTIF_ID, builder.build());
+        }
+    }
+
+    private void cancelNotification() {
+        NotificationManagerCompat.from(this).cancel(NOTIF_ID);
     }
 }
