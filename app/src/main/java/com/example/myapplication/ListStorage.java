@@ -25,6 +25,7 @@ public class ListStorage {
 
     public ArrayList<MediaList> loadAll() {
         ArrayList<MediaList> result = new ArrayList<>();
+        boolean needsSave = false;   // true if we had to give old items an id
         String json = prefs.getString(uid, null);
         if (json == null) return result;
 
@@ -45,11 +46,16 @@ public class ListStorage {
                     } else {
                         item = gson.fromJson(itemObj, Album.class);
                     }
+                    if (!item.hasId()) {
+                        item.getId();          // creates the id
+                        needsSave = true;
+                    }
                     list.getItems().add(item);
                 }
             }
             result.add(list);
         }
+        if (needsSave) saveAll(result);   // keep the new ids
         return result;
     }
 

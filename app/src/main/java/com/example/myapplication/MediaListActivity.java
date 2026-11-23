@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -112,6 +113,14 @@ public class MediaListActivity extends AppCompatActivity {
                     if (list != null && position < list.getItems().size()) {
                         list.getItems().remove(position);
                         storage.saveList(list);
+                        // also delete this item's review from Firebase
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        if (user != null) {
+                            FirebaseDatabase.getInstance(MainActivity.DATABASE_URL)
+                                    .getReference("users").child(user.getUid())
+                                    .child("reviews").child(item.getId())
+                                    .removeValue();
+                        }
                     }
                     reload();
                 })
