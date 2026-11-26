@@ -30,17 +30,28 @@ public class ItemDetailsActivity extends AppCompatActivity {
             return;
         }
 
-        MediaList list = new ListStorage(this, user.getUid()).findList(listId);
-        if (list == null || itemIndex < 0 || itemIndex >= list.getItems().size()) {
-            finish();
-            return;
-        }
-        MediaItem item = list.getItems().get(itemIndex);
+        // the back button works right away, even while the list is still loading
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
+        // the list now comes from Firebase, so wait for it before showing the item
+        new ListStorage(user.getUid()).findList(listId)
+                .addOnSuccessListener(this, list -> {
+                    if (list == null || itemIndex < 0 || itemIndex >= list.getItems().size()) {
+                        finish();
+                        return;
+                    }
+                    showItem(user, list.getItems().get(itemIndex));
+                })
+                .addOnFailureListener(this, e -> {
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    finish();
+                });
+    }
+
+    private void showItem(FirebaseUser user, MediaItem item) {
         TextView tvJob = findViewById(R.id.tvJob);   // old id from another project, it's just the title here
         EditText etReview = findViewById(R.id.etReview);
         Button btnSave = findViewById(R.id.btnCall);  // the "save" button
-        Button btnBack = findViewById(R.id.btnBack);
 
         tvJob.setText(item.getTitle());
 
@@ -69,8 +80,6 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         .addOnFailureListener(e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show());
             }
         });
-
-        btnBack.setOnClickListener(v -> finish());
 
         // TODO later: btnWeb (add to another list)
     }

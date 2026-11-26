@@ -6,6 +6,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,7 +38,7 @@ public class MediaListActivity extends AppCompatActivity {
             finish();
             return;
         }
-        storage = new ListStorage(this, user.getUid());
+        storage = new ListStorage(user.getUid());
 
         tvListTitle = findViewById(R.id.tvListTitle);
         tvStats = findViewById(R.id.tvStats);
@@ -75,34 +76,47 @@ public class MediaListActivity extends AppCompatActivity {
     }
 
     private void reload() {
-        MediaList list = storage.findList(listId);
-        if (list == null) {      // the list was deleted
-            finish();
-            return;
-        }
-        tvListTitle.setText(list.getName());   // the title comes from the code, not the XML
-        tvStats.setText("items in total : " + list.getItems().size()
-                + " | games : " + list.countGames()
-                + " | albums : " + list.countAlbums());
+        storage.findList(listId)
+                .addOnSuccessListener(this, list -> {
+                    if (list == null) {      // the list was deleted
+                        finish();
+                        return;
+                    }
+                    tvListTitle.setText(list.getName());   // the title comes from the code, not the XML
+                    tvStats.setText("items in total : " + list.getItems().size()
+                            + " | games : " + list.countGames()
+                            + " | albums : " + list.countAlbums());
 
-        shownItems.clear();
-        shownItems.addAll(list.getItems());
-        adapter.notifyDataSetChanged();
+                    shownItems.clear();
+                    shownItems.addAll(list.getItems());
+                    adapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(this, this::showError);
+    }
+
+    private void showError(Exception e) {
+        android.util.Log.e("ScorelyLists", "Firebase error", e);   // see Logcat, filter: ScorelyLists
+        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     private void fillExample() {
-        MediaList list = storage.findList(listId);
-        if (list == null) return;
+        storage.findList(listId)
+                .addOnSuccessListener(list -> {
+                    if (list == null) return;
 
-        list.getItems().add(new Game("Hades", "Supergiant Games", "Supergiant Games",
-                2020, 9, 17, 95, new ArrayList<>(Arrays.asList("PC", "Switch", "PS5"))));
+                    list.getItems().add(new Game("Hades", "Supergiant Games", "Supergiant Games",
+                            2020, 9, 17, 95, new ArrayList<>(Arrays.asList("PC", "Switch", "PS5"))));
 
-        list.getItems().add(new Album("In Rainbows", "Radiohead", "Alternative rock",
-                false, false, new ArrayList<>(Arrays.asList("15 Step", "Bodysnatchers", "Nude")),
-                42, 2007, 10, 10, 96));
+                    list.getItems().add(new Album("In Rainbows", "Radiohead", "Alternative rock",
+                            false, false, new ArrayList<>(Arrays.asList("15 Step", "Bodysnatchers", "Nude")),
+                            42, 2007, 10, 10, 96));
 
-        storage.saveList(list);   // changed the items -> save the whole list back
-        reload();
+                    // changed the items -> save the whole list back
+                    storage.saveList(list)
+                            .addOnSuccessListener(x -> reload())
+                            .addOnFailureListener(this::showError);
+                })
+                .addOnFailureListener(this::showError);
     }
 
     private void confirmDelete(int position) {
@@ -110,20 +124,25 @@ public class MediaListActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setMessage(getString(R.string.remove_list) + " " + item.getTitle() + "?")
                 .setPositiveButton(getString(R.string.delete), (d, w) -> {
-                    MediaList list = storage.findList(listId);
-                    if (list != null && position < list.getItems().size()) {
-                        list.getItems().remove(position);
-                        storage.saveList(list);
-                        // also delete this item's review from Firebase
-                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                        if (user != null) {
-                            FirebaseDatabase.getInstance(MainActivity.DATABASE_URL)
-                                    .getReference("users").child(user.getUid())
-                                    .child("reviews").child(item.getId())
-                                    .removeValue();
-                        }
-                    }
-                    reload();
+                    storage.findList(listId)
+                            .addOnSuccessListener(list -> {
+                                if (list == null) return;
+                                // remove by id, not by position, in case the list changed meanwhile
+                                list.getItems().removeIf(i -> i.getId().equals(item.getId()));
+                                storage.saveList(list)
+                                        .addOnSuccessListener(x -> reload())
+                                        .addOnFailureListener(this::showError);
+
+                                // also delete this item's review from Firebase
+                                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                                if (user != null) {
+                                    FirebaseDatabase.getInstance(MainActivity.DATABASE_URL)
+                                            .getReference("users").child(user.getUid())
+                                            .child("reviews").child(item.getId())
+                                            .removeValue();
+                                }
+                            })
+                            .addOnFailureListener(this::showError);
                 })
                 .setNegativeButton(getString(R.string.cancel), null)
                 .show();

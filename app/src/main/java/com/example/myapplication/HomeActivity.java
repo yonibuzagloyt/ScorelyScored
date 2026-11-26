@@ -39,7 +39,7 @@ public class HomeActivity extends AppCompatActivity {
             goToLogin();
             return;
         }
-        storage = new ListStorage(this, user.getUid());
+        storage = new ListStorage(user.getUid());
 
         TextView tvHello = findViewById(R.id.tvHello);
         tvTime = findViewById(R.id.tvTime);
@@ -89,10 +89,19 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void reload() {
-        lists.clear();
-        lists.addAll(storage.loadAll());
-        adapter.notifyDataSetChanged();
-        tvTime.setText(getString(R.string.hour_currently) + " " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+        storage.loadAll()
+                .addOnSuccessListener(this, loaded -> {
+                    lists.clear();
+                    lists.addAll(loaded);
+                    adapter.notifyDataSetChanged();
+                    tvTime.setText(getString(R.string.hour_currently) + " " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+                })
+                .addOnFailureListener(this, e -> showError(e));
+    }
+
+    private void showError(Exception e) {
+        android.util.Log.e("ScorelyLists", "Firebase error", e);   // see Logcat, filter: ScorelyLists
+        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     private void askForListName() {
@@ -109,8 +118,9 @@ public class HomeActivity extends AppCompatActivity {
                         Toast.makeText(this, R.string.please_enter_name, Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    storage.addList(name);
-                    reload();
+                    storage.addList(name)
+                            .addOnSuccessListener(list -> reload())
+                            .addOnFailureListener(this::showError);
                 })
                 .setNegativeButton(getString(R.string.cancel), null)
                 .show();
@@ -121,8 +131,9 @@ public class HomeActivity extends AppCompatActivity {
                 .setTitle(R.string.remove_list)
                 .setMessage(getString(R.string.remove) + list.getName() + getString(R.string.and_its_items))
                 .setPositiveButton(R.string.delete, (d, w) -> {
-                    storage.deleteList(list.getId());
-                    reload();
+                    storage.deleteList(list.getId())
+                            .addOnSuccessListener(x -> reload())
+                            .addOnFailureListener(this::showError);
                 })
                 .setNegativeButton(getString(R.string.cancel), null)
                 .show();
